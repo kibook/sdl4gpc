@@ -1402,12 +1402,241 @@ function SDL_SetColorKey(surface: PSDL_Surface;
 function SDL_SetAlpha(surface: PSDL_Surface; flag: Uint32;
   alpha: UInt8): CInteger; external name 'SDL_SetAlpha';
 
+procedure SDL_SetClipRect(surface: PSDL_Surface; rect: PSDL_Rect);
+  external name 'SDL_SetClipRect';
+
+procedure SDL_GetClipRect(surface: PSDL_Surface; rect: PSDL_Rect);
+  external name 'SDL_GetClipRect';
+
+function SDL_ConvertSurface(src: PSDL_Surface; fmt: PSDL_PixelFormat;
+  flags: UInt32): PSDL_Surface; external name 'SDL_ConvertSurface';
+
 function SDL_BlitSurface(src: PSDL_Surface; const srcrect: PSDL_Rect;
   dst: PSDL_Surface; dstrect: PSDL_Rect): CInteger;
   external name 'SDL_BlitSurface';
 
+function SDL_UpperBlit(src: PSDL_Surface; srcrect: PSDL_Rect;
+  dst: PSDL_Surface; dstrect: PSDL_Rect): CInteger;
+  external name 'SDL_UpperBlit';
+
+function SDL_LowerBlit(src: PSDL_Surface; srcrect: PSDL_Rect;
+  dst: PSDL_Surface; dstrect: PSDL_Rect): CInteger;
+  external name 'SDL_LowerBlit';
+
 function SDL_FillRect(dst: PSDL_Surface; const rect: PSDL_Rect;
   color: UInt32): CInteger; external name 'SDL_FillRect';
+
+function SDL_DisplayFormat(surface: PSDL_Surface): PSDL_Surface;
+  external name 'SDL_DisplayFormat';
+
+function SDL_DisplayFormatAlpha(surface: PSDL_Surface): PSDL_Surface;
+  external name 'SDL_DisplayFormatAlpha';
+
+{-------------------------------------------------------------------------}
+{ YUV video surface overlay functions                                     }
+{-------------------------------------------------------------------------}
+
+function SDL_CreateYUVOverlay(width, height: CInteger; fmt: UInt32;
+  display: PSDL_Surface): PSDL_Overlay;
+  external name 'SDL_CreateYUVOverlay';
+
+function SDL_LockYUVOveraly(overlay: PSDL_Overlay): CInteger;
+  external name 'SDL_LockYUVOverlay';
+
+procedure SDL_UnlockYUVOverlay(overlay: PSDL_Overlay);
+  external name 'SDL_UnlockYUVOverlay';
+
+function SDL_DisplayYUVOverlay(overlay: PSDL_Overlay;
+  dstrect: PSDL_Rect): CInteger; external name 'SDL_DisplayYUVOverlay';
+
+procedure SDL_FreeYUVOverlay(overlay: PSDL_Overlay);
+  external name 'SDL_FreeYUVOverlay';
+
+{-------------------------------------------------------------------------}
+{ OpenGL routines                                                         }
+{-------------------------------------------------------------------------}
+
+function SDL_GL_LoadLibrary(filename: CString): CInteger;
+  external name 'SDL_GL_LoadLibrary';
+
+function SDL_GL_GetProcAddress(procname: CString): Pointer;
+  external name 'SDL_GL_GetProcAddress';
+
+function SDL_GL_SetAttribute(attr: TSDL_GLAttr;
+  value: CInteger): CInteger; external name 'SDL_GL_SetAttribute';
+
+function SDL_GL_GetAttribute(attr: TSDL_GLAttr;
+  var value: CInteger): CInteger; external name 'SDL_GL_GetAttribute';
+
+procedure SDL_GL_SwapBuffers; external name 'SDL_GL_SwapBuffers';
+
+procedure SDL_GL_UpdateRects(numrects: CInteger; rects: PSDL_Rect);
+  external name 'SDL_GL_UpdateRects';
+
+procedure SDL_GL_Lock; external name 'SDL_GL_Lock';
+
+procedure SDL_GL_Unlock; external name 'SDL_GL_Unlock';
+
+{-------------------------------------------------------------------------}
+{ Window manager                                                          }
+{-------------------------------------------------------------------------}
+
+procedure SDL_WM_GetCaption(var title, icon: CString);
+  external name 'SDL_WM_GetCaption';
+
+procedure SDL_WM_SetCaption(const title, icon: CString);
+  external name 'SDL_WM_SetCaption';
+
+procedure SDL_WM_SetIcon(icon: PSDL_Surface; mask: PUInt8);
+  external name 'SDL_WM_SetIcon';
+
+function SDL_WM_IconifyWindow: CInteger;
+  external name 'SDL_WM_IconifyWindow';
+
+function SDL_WM_ToggleFullscreen(surface: PSDL_Surface): CInteger;
+  external name 'SDL_WM_ToggleFullscreen';
+
+function SDL_WM_GrabInput(mode: TSDL_GrabMode): TSDL_GrabMode;
+  external name 'SDL_WM_GrabInput';
+
+function SDL_GetWMInfo(info: PSDL_SysWMinfo): CInteger;
+  external name 'SDL_GetWMInfo';
+
+{-------------------------------------------------------------------------}
+{ Mouse routines                                                          }
+{-------------------------------------------------------------------------}
+
+function SDL_GetMouseState(var x, y: CInteger): UInt8;
+  external name 'SDL_GetMouseState';
+
+function SDL_GetRelativeMouseState(var x, y: CInteger): UInt8;
+  external name 'SDL_GetRelativeMouseState';
+
+procedure SDL_WarpMouse(x, y: UInt16); external name 'SDL_WarpMouse';
+
+function SDL_CreateCursor(data, mask: PUInt8;
+  w, h, hot_x, hot_y: CInteger): PSDL_Cursor;
+  external name 'SDL_CreateCursor';
+
+procedure SDL_SetCursor(cursor: PSDL_Cursor);
+  external name 'SDL_SetCursor';
+
+function SDL_GetCursor: PSDL_Cursor; external name 'SDL_GetCursor';
+
+procedure SDL_FreeCursor(cursor: PSDL_Cursor);
+  external name 'SDL_FreeCursor';
+
+function SDL_ShowCursor(toggle: CInteger): CInteger;
+  external name 'SDL_ShowCursor';
+
+{-------------------------------------------------------------------------}
+{ Keyboard routines                                                       }
+{-------------------------------------------------------------------------}
+
+function SDL_EnableUNICODE(enable: CInteger): CInteger;
+  external name 'SDL_EnableUNICODE';
+
+function SDL_EnableKeyRepeat(delay, interval: CInteger): CInteger;
+  external name 'SDL_EnableKeyRepeat';
+
+procedure SDL_GetKeyRepeat(delay, interval: PInteger);
+  external name 'SDL_GetKeyRepeat';
+
+function SDL_GetKeyState(numkeys: PInt): PUInt8;
+  external name 'SDL_GetKeyState';
+
+function SDL_GetModState: TSDLMod; external name 'SDL_GetModState';
+
+procedure SDL_SetModState(modstate: TSDLMod);
+  external name 'SDL_SetModState';
+
+function SDL_GetKeyName(key: TSDLKey): CString;
+  external name 'SDL_GetKeyName';
+
+{-------------------------------------------------------------------------}
+{ Active routines                                                         }
+{-------------------------------------------------------------------------}
+
+function SDL_GetAppState: UInt8; external name 'SDL_GetAppState';
+
+{-------------------------------------------------------------------------}
+{ Mutex functions                                                         }
+{-------------------------------------------------------------------------}
+
+function SDL_CreateMutex: PSDL_Mutex; external name 'SDL_CreateMutex';
+
+function SDL_mutexP(mutex: PSDL_mutex): CInteger;
+  external name 'SDL_mutexP';
+
+function SDL_LockMutex(mutex: PSDL_mutex): CInteger;
+  external name 'SDL_LockMutex';
+
+function SDL_mutexV(mutex: PSDL_mutex): CInteger;
+  external name 'SDL_mutexV';
+
+procedure SDL_DestroyMutex(mutex: PSDL_mutex);
+  external name 'SDL_DestroyMutex';
+
+{-------------------------------------------------------------------------}
+{ Semaphore functions                                                     }
+{-------------------------------------------------------------------------}
+
+function SDL_CreateSemaphore(initial_value: UInt32): PSDL_Sem;
+  external name 'SDL_CreateSemaphore';
+
+procedure SDL_DestroySemaphore(sem: PSDL_Sem);
+  external name 'SDL_DestroySemaphore';
+
+function SDL_SemWait(sem: PSDL_Sem): CInteger; external name 'SDL_SemWait';
+
+function SDL_SemTryWait(sem: PSDL_Sem): CInteger;
+  external name 'SDL_SemTryWait';
+
+function SDL_SemWaitTimeout(sem: PSDL_Sem; ms: UInt32): CInteger;
+  external name 'SDL_SemWaitTimeout';
+
+function SDL_SemPost(sem: PSDL_Sem): CInteger; external name 'SDL_SemPost';
+
+function SDL_SemValue(sem: PSDL_Sem): UInt32; external name 'SDL_SemValue';
+
+{-------------------------------------------------------------------------}
+{ Condition variable functions                                            }
+{-------------------------------------------------------------------------}
+
+function SDL_CreateCond: PSDL_Cond; external name 'SDL_CreateCond';
+
+procedure SDL_DestroyCond(cond: PSDL_Cond);
+  external name 'SDL_DestroyCond';
+
+function SDL_CondSignal(cond: PSDL_Cond): CInteger;
+  external name 'SDL_CondSignal';
+
+function SDL_CondBroadcast(cond: PSDL_Cond): CInteger;
+  external name 'SDL_CondBroadcast';
+
+function SDL_CondWait(cond: PSDL_Cond; mut: PSDL_Mutex): CInteger;
+  external name 'SDL_CondWait';
+
+function SDL_CondWaitTimeout(cond: PSDL_Cond; mut: PSDL_Mutex;
+  ms: UInt32): CInteger; external name 'SDL_CondWaitTimeout';
+
+{-------------------------------------------------------------------------}
+{ Thread routines                                                         }
+{-------------------------------------------------------------------------}
+
+function SDL_CreateThread(fn: PInt; data: Pointer): PSDL_Thread;
+  external name 'SDL_CreateThread';
+
+function SDL_ThreadID: UInt32; external name 'SDL_ThreadID';
+
+function SDL_GetThreadID(thread: PSDL_Thread): UInt32;
+  external name 'SDL_GetThreadID';
+
+procedure SDL_WaitThread(thread: PSDL_Thread; var status: CInteger);
+  external name 'SDL_WaitThread';
+
+procedure SDL_KillThread(thread: PSDL_Thread);
+  external name 'SDL_KillThread';
 
 end;
 
