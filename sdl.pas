@@ -878,8 +878,8 @@ type
     GMask: UInt32;
     BMask: UInt32;
     AMask: UInt32;
-    colorkey: UInt32; // RGB color key information
-    alpha: UInt8; // Alpha value information (per-surface alpha)
+    colorkey: UInt32;
+    alpha: UInt8;
   end;
 
   PSDL_BlitInfo = ^TSDL_BlitInfo;
@@ -1638,6 +1638,196 @@ procedure SDL_WaitThread(thread: PSDL_Thread; var status: CInteger);
 procedure SDL_KillThread(thread: PSDL_Thread);
   external name 'SDL_KillThread';
 
+{-------------------------------------------------------------------------}
+{ Helper functions                                                        }
+{-------------------------------------------------------------------------}
+
+function SDL_TableSize(Table: CString): CInteger;
+
+procedure SDL_OutOfMemory;
+
+function SDL_RWSeek(Context: PSDL_RWops; 
+  Offset, Whence: CInteger): CInteger;
+
+function SDL_RWTell(Context: PSDL_RWops): CInteger;
+
+function SDL_RWRead(Context: PSDL_RWops; Ptr: Pointer;
+  Size, n: CInteger): CInteger;
+
+function SDL_RWWrite(Context: PSDL_RWops; Ptr: Pointer;
+  Size, n: CInteger): CInteger;
+
+function SDL_RWClose(Context: PSDL_RWops): CInteger;
+
+function SDL_LoadWAV(FileName: CString; Spec: PSDL_AudioSpec;
+  Audio_Buf: PUInt8; AudioLen: PUInt32): PSDL_AudioSpec;
+
+function SDL_CDInDrive(Status: TSDL_CDStatus): LongBool;
+
+procedure FRAMES_TO_MSF(Frames: CInteger; var M, S, F: CInteger);
+
+function MSF_TO_FRAMES(M, S, F: CInteger) = Frames: CInteger;
+
+procedure SDL_VERSION(var x: TSDL_Version);
+
+function SDL_VERSIONNUM(x, y, z: CInteger): CInteger;
+
+function SDL_COMPILEDVERSION: CInteger;
+
+function SDL_VERSION_ATLEAST(x, y, z: CInteger): LongBool;
+
+function SDL_LoadBMP(FileName: CString): PSDL_Surface;
+
+function SDL_SaveBMP(Surface: PSDL_Surface; FileName: CString): CInteger;
+
+function SDL_AllocSurface(Flags: UInt32; Width, Height, Depth: CInteger;
+  RMask, GMask, BMask, AMask: UInt32): PSDL_Surface;
+
+function SDL_MustLock(Surface: PSDL_Surface): Boolean;
+
+function SDL_LockMutex(Mutex: PSDL_Mutex): CInteger;
+
+function SDL_UnlockMutex(Mutex: PSDL_Mutex): CInteger;
+
+function SDL_BUTTON(Button: CInteger): CInteger;
+
+function SDL_Swap32(D: UInt32): UInt32;
+
+end;
+
+function SDL_TableSize(Table: CString): CInteger;
+begin
+  SDL_TableSize := SizeOf(Table) div SizeOf(Table^)
+end;
+
+procedure SDL_OutOfMemory;
+begin
+  {$IFNDEF __WINDOWS__}
+  SDL_Error(SDL_ENOMEM)
+  {$ENDIF}
+end;
+
+function SDL_RWSeek(Context: PSDL_RWops;
+  Offset, Whence: CInteger): CInteger;
+begin
+  SDL_RWSeek := Context^.Seek(Context, Offset, Whence)
+end;
+
+function SDL_RWTell(context: PSDL_RWops): CInteger;
+begin
+  SDL_RWTell := Context^.Seek(Context, 0, 1)
+end;
+
+function SDL_RWRead(Context: PSDL_RWops; Ptr: Pointer; Size, n: CInteger);
+begin
+  SDL_RWRead := Context^.Read(Context, Ptr, Size, n)
+end;
+
+function SDL_RWWrite(Context: PSDL_RWops; Ptr: Pointer;
+  Size, n: CInteger): CInteger;
+begin
+  SDL_RWWrite := Context^.Write(Context, Ptr, Size, n)
+end;
+
+function SDL_RWClose(Context: PSDL_RWops): CInteger;
+begin
+  SDL_RWClose := Context^.Close(Context)
+end;
+
+function SDL_LoadWAV(FileName: CString; Spec: PSDL_AudioSpec;
+  Audio_Buf: PUInt8; AudioLen: PUInt32): PSDL_AudioSpec;
+begin
+  SDL_LoadWAV := SDL_LoadWAV_RW(SDL_RWFromFile(FileName, 'rb'), 1,
+    Spec, Audio_Buf, AudioLen)
+end;
+
+function SDL_CDInDrive(Status: TSDL_CDStatus): LongBool;
+begin
+  SDL_CDInDrive := Ord(Status) > Ord(CD_ERROR)
+end;
+
+procedure FRAMES_TO_MSF(Frames: CInteger; var M, S, F: CInteger);
+var
+  Value: CInteger;
+begin
+  Value := Frames;
+  F := Value mod CD_FPS;
+  Value := Value div CD_FPS;
+  S := Value mod 60;
+  Value := Value div 60;
+  M := Value
+end;
+
+function MSF_TO_FRAMES(M, S, F: CInteger): CInteger;
+begin
+  MSF_TO_FRAMES := M * 60 * CD_FPS + S * CD_FPS + F
+end;
+
+procedure SDL_VERSION(var x: TSDL_Version);
+begin
+  x.major := SDL_MAJOR_VERSION;
+  x.minor := SDL_MINOR_VERSION;
+  x.patch := SDL_PATCHLEVEL
+end;
+
+function SDL_VERSIONNUM(x, y, z: CInteger): CInteger;
+begin
+  SDL_VERSIONNUM := x * 1000 + y * 100 + z
+end;
+
+function SDL_COMPILEDVERSION: CInteger;
+begin
+  SDL_COMPILEDVERSION := SDL_VERSIONNUM(SDL_MAJOR_VERSION,
+    SDL_MINOR_VERSION, SDL_PATCHLEVEL)
+end;
+
+function SDL_VERSION_ATLEAST(x, y, z: CInteger): LongBool;
+begin
+  SDL_VERSION_ATLEAST := SDL_COMPILEDVERSION >= SDL_VERSIONNUM(x, y, z)
+end;
+
+function SDL_LoadBMP(FileName: CString): PSDL_Surface;
+begin
+  SDL_LoadBMP := SDL_LoadBMP_RW(SDL_RWFromFile(FileName, 'rb'), 1)
+end;
+
+function SDL_SaveBMP(Surface: PSDL_Surface; FileName: CString): CInteger;
+begin
+  SDL_SaveBMP := SDL_SaveBMP_RW(Surface, SDL_RWFromFile(FileName, 'wb'), 1)
+end;
+
+function SDL_AllocSurface(Flags: UInt32; Width, Height, Depth: CInteger;
+  RMask, GMask, BMask, AMask: UInt32): PSDL_Surface;
+begin
+  SDL_AllocSurface := SDL_CreateRGBSurface(Flags, Width, Height, Depth,
+    RMask, GMask, BMask, AMask)
+end;
+
+function SDL_MustLock(Surface: PSDL_Surface): Boolean;
+begin
+  SDL_MustLock := ((Surface^.Offset <> 0) or ((Surface^.Flags and
+    (SDL_HWSURFACE or SDL_ASYNCBIT or SDL_RLEACCEL)) <> 0))
+end;
+
+function SDL_LockMutex(Mutex: PSDL_Mutex): CInteger;
+begin
+  SDL_LockMutex := SDL_MutexP(Mutex)
+end;
+
+function SDL_UnlockMutex(Mutex: PSDL_Mutex): CInteger;
+begin
+  SDL_UnlockMutex := SDL_MutexV(Mutex)
+end;
+
+function SDL_BUTTON(Button: CInteger): CInteger;
+begin
+  SDL_BUTTON := SDL_PRESSED shl (Button - 1)
+end;
+
+function SDL_Swap32(D: UInt32): UInt32;
+begin
+  SDL_Swap32 := ((D shl 24) or ((D shl 8) and $00FF0000) or ((D shr 8) and
+    $0000FF00) or (D shr 24))
 end;
 
 end.
