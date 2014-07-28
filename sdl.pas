@@ -1411,10 +1411,6 @@ procedure SDL_GetClipRect(surface: PSDL_Surface; rect: PSDL_Rect);
 function SDL_ConvertSurface(src: PSDL_Surface; fmt: PSDL_PixelFormat;
   flags: UInt32): PSDL_Surface; external name 'SDL_ConvertSurface';
 
-function SDL_BlitSurface(src: PSDL_Surface; const srcrect: PSDL_Rect;
-  dst: PSDL_Surface; dstrect: PSDL_Rect): CInteger;
-  external name 'SDL_BlitSurface';
-
 function SDL_UpperBlit(src: PSDL_Surface; srcrect: PSDL_Rect;
   dst: PSDL_Surface; dstrect: PSDL_Rect): CInteger;
   external name 'SDL_UpperBlit';
@@ -1666,7 +1662,7 @@ function SDL_CDInDrive(Status: TSDL_CDStatus): LongBool;
 
 procedure FRAMES_TO_MSF(Frames: CInteger; var M, S, F: CInteger);
 
-function MSF_TO_FRAMES(M, S, F: CInteger) = Frames: CInteger;
+function MSF_TO_FRAMES(M, S, F: CInteger): CInteger;
 
 procedure SDL_VERSION(var x: TSDL_Version);
 
@@ -1718,7 +1714,8 @@ begin
   SDL_RWTell := Context^.Seek(Context, 0, 1)
 end;
 
-function SDL_RWRead(Context: PSDL_RWops; Ptr: Pointer; Size, n: CInteger);
+function SDL_RWRead(Context: PSDL_RWops; Ptr: Pointer;
+  Size, n: CInteger): CInteger;
 begin
   SDL_RWRead := Context^.Read(Context, Ptr, Size, n)
 end;
@@ -1806,7 +1803,7 @@ end;
 function SDL_MustLock(Surface: PSDL_Surface): Boolean;
 begin
   SDL_MustLock := ((Surface^.Offset <> 0) or ((Surface^.Flags and
-    (SDL_HWSURFACE or SDL_ASYNCBIT or SDL_RLEACCEL)) <> 0))
+    (SDL_HWSURFACE or SDL_ASYNCBLIT or SDL_RLEACCEL)) <> 0))
 end;
 
 function SDL_LockMutex(Mutex: PSDL_Mutex): CInteger;
