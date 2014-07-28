@@ -33,6 +33,10 @@ const
   LIBMIKMOD_VERSION = ((LIBMIKMOD_VERSION_MAJOR shl 16) or
     (LIBMIKMOD_VERSION_MINOR shl 8) or (LIBMIKMOD_REVISION));
 
+  MIX_CHANNEL_POST = -2;
+
+  MIX_EFFECTSMAXSPEED = 'MIX_EFFECTSMAXSPEED';
+
 type
   PMusicCMD = ^TMusicCMD;
   TMusicCMD = record
@@ -200,6 +204,13 @@ type
   TMixFunction = function(udata: Pointer; stream: PUint8;
     len: CInteger): Pointer;
 
+  TChannel_Finished = procedure(Channel: CInteger);
+
+  TMix_EffectFunc = function(Chan: CInteger; Stream: Pointer;
+    Len: CInteger; UData: Pointer): Pointer;
+
+  TMix_EffectDone = function(Chan: CInteger; UData: Pointer): Pointer;
+
 function Mix_Linked_Version: PSDL_Version;
   external name 'Mix_Linked_Version';
 
@@ -219,6 +230,9 @@ function Mix_LoadWAV_RW(src: PSDL_RWops; freesrc: CInteger): PMix_Chunk;
 function Mix_LoadMUS(const filename: CString): PMix_Music;
   external name 'Mix_LoadMUS';
 
+function Mix_LoadMUS_RW(rw: PSDL_RWops): PMix_Music;
+  external name 'Mix_LoadMUS_RW';
+
 function Mix_QuickLoad_WAV(mem: PUint8): PMix_Chunk;
   external name 'Mix_QuickLoad_WAV';
 
@@ -232,16 +246,149 @@ function Mix_GetMusicType(music: PMix_Music): TMix_MusicType;
 procedure Mix_SetPostMix(mix_func: TMixFunction; arg: Pointer);
   external name 'Mix_SetPostMix';
 
+procedure Mix_HookMusic(Mix_Func: TMixFunction; Arg: Pointer);
+  external name 'Mix_HookMusic';
+
+procedure Mix_HookMusicFinished(Music_Finished: Pointer);
+  external name 'Mix_HookMusicFinished';
+
+function Mix_GetMusicHookData: Pointer;
+  external name 'Mix_GetMusicHookData';
+
+procedure Mix_ChannelFinished(Channel_Finished: TChannel_Finished);
+  external name 'Mix_ChannelFinished';
+
+function Mix_RegisterEffect(Chan: CInteger; f: TMix_EffectFunc;
+  d: TMix_EffectDone; arg: Pointer): CInteger;
+  external name 'Mix_RegisterEffect';
+
+function Mix_UnregisterEffect(Chan: CInteger; f: TMix_EffectFunc): CInteger;
+  external name 'Mix_UnregisterEffect';
+
+function Mix_UnregisterAllEffects(Chan: CInteger): CInteger;
+  external name 'Mix_UnregisterAllEffects';
+
+function Mix_SetPanning(Chan: CInteger; Left, Right: UInt8): CInteger;
+  external name 'Mix_SetPanning';
+
+function Mix_SetPosition(Chan: CInteger; Angle: SInt16;
+  Distance: UInt8): CInteger; external name 'Mix_SetPosition';
+
+function Mix_SetDistance(Chan: CInteger; Distance: UInt8): CInteger;
+  external name 'Mix_SetDistance';
+
+function Mix_SetReverseStereo(Chan, Flip: CInteger): CInteger;
+  external name 'Mix_SetReverseStereo';
+
+function Mix_ReserveChannels(Num: CInteger): CInteger;
+  external name 'Mix_ReserveChannels';
+
+function Mix_GroupChannel(Which, Tag: CInteger): CInteger;
+  external name 'Mix_GroupChannel';
+
+function Mix_GroupChannels(From, To_, Tag: CInteger): CInteger;
+  external name 'Mix_GroupChannels';
+
+function Mix_GroupAvailable(Tag: CInteger): CInteger;
+  external name 'Mix_GroupAvailable';
+
+function Mix_GroupCount(Tag: CInteger): CInteger;
+  external name 'Mix_GroupCount';
+
+function Mix_GroupOldest(Tag: CInteger): CInteger;
+  external name 'Mix_GroupOldest';
+
+function Mix_GroupNewer(Tag: CInteger): CInteger;
+  external name 'Mix_GroupNewer';
+
+function Mix_PlayChannelTimed(Chan: CInteger; Chunk: PMix_Chunk;
+  Loops, Ticks: CInteger): CInteger; external name 'Mix_PlayChannelTimed';
+
+function Mix_PlayChannel(Chan: CInteger; Chunk: PMix_Chunk;
+  Loops: CInteger): CInteger; external name 'Mix_PlayChannel';
+
+function Mix_PlayMusic(music: PMix_Music; loops: CInteger): CInteger;
+  external name 'Mix_PlayMusic';
+
+function Mix_FadeInMusic(Music: PMix_Music; Loops, MS: CInteger): CInteger;
+  external name 'Mix_FadeInMusic';
+
+function Mix_FadeInChannelTimed(Chan: CInteger; Chunk: PMix_Chunk;
+  Loops, MS, Ticks: CInteger): CInteger;
+  external name 'Mix_FadeInChannelTimed';
+
+function Mix_FadeInChannel(Chan: CInteger; Chunk: PMix_Chunk;
+  Loops, MS: CInteger): CInteger; external name 'Mix_FadeInChannel';
+
+function Mix_Volume(Chan: CInteger; Chunk: PMix_Chunk;
+  Loops, MS: CInteger): CInteger; external name 'Mix_Volume';
+
+function Mix_VolumeChunk(Chunk: PMix_Chunk; Volume: CInteger): CInteger;
+  external name 'Mix_VolumeChunk';
+
+function Mix_HaltChannel(Chan: CInteger): CInteger;
+  external name 'Mix_HaltChannel';
+
+function Mix_HaltGroup(Tag: CInteger): CInteger;
+  external name 'Mix_HaltGroup';
+
+function Mix_HaltMusic: CInteger; external name 'Mix_HaltMusic';
+
+function Mix_ExpireChannel(Chan: CInteger; Ticks: CInteger): CInteger;
+  external name 'Mix_ExpireChannel';
+
+function Mix_FadeOutChannel(Which, MS: CInteger): CInteger;
+  external name 'Mix_FadeOutChannel';
+
+function Mix_FadeOutGroup(Tag, MS: CInteger): CInteger;
+  external name 'Mix_FadeOutGroup';
+
+function Mix_FadeOutMusic(MS: CInteger): CInteger;
+  external name 'Mix_FadeOutMusic';
+
+function Mix_FadingMusic: TMix_Fading; external name 'Mix_FadingMusic';
+
+function Mix_FadingChannel(Which: CInteger): TMix_Fading;
+  external name 'Mix_FadingChannel';
+
+procedure Mix_Pause(Chan: CInteger); external name 'Mix_Pause';
+
+procedure Mix_Resume(Chan: CInteger); external name 'Mix_Resume';
+
+function Mix_Paused(Chan: CInteger): CInteger; external name 'Mix_Paused';
+
+procedure Mix_PauseMusic; external name 'Mix_PauseMusic';
+
+procedure Mix_ResumeMusic; external name 'Mix_ResumeMusic';
+
+procedure Mix_RewindMusic; external name 'Mix_RewindMusic';
+
+function Mix_PausedMusic: CInteger; external name 'Mix_PausedMusic';
+
+function Mix_SetMusicPosition(Position: Double): CInteger;
+  external name 'Mix_SetMusicPosition';
+
+function Mix_Playing(Chan: CInteger): CInteger; external name 'Mix_Playing';
+
+function Mix_PlayingMusic: CInteger; external name 'Mix_PlayingMusic';
+
+function Mix_SetMusicCMD(const Command: CString): CInteger;
+  external name 'Mix_SetMusicCMD';
+
+function Mix_SetSynchroValue(Value: CInteger): CInteger;
+  external name 'Mix_SetSynchroValue';
+
+function Mix_GetSynchroValue(Value: CInteger): CInteger;
+  external name 'Mix_GetSynchroValue';
+
+function Mix_GetChunk(Chan: CInteger): PMix_Chunk;
+  external name 'Mix_GetChunk';
+
 procedure Mix_CloseAudio; external name 'Mix_CloseAudio';
 
 procedure Mix_SetError(fmt: CString); external name 'Mix_SetError';
 
 function Mix_GetError: CString; external name 'Mix_GetError';
-
-function Mix_PlayMusic(music: PMix_Music; loops: CInteger): CInteger;
-  external name 'Mix_PlayMusic';
-
-function Mix_HaltMusic: CInteger; external name 'Mix_HaltMusic';
 
 end;
 
